@@ -1,6 +1,9 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 function getTime() {
   return new Date().toLocaleTimeString([], {
@@ -13,6 +16,7 @@ export default function App() {
   const [message, setMessage] = useState("");
   const [chat, setChat] = useState([]);
   const [thinking, setThinking] = useState(false);
+
   const bottomRef = useRef(null);
   const textareaRef = useRef(null);
 
@@ -22,30 +26,50 @@ export default function App() {
 
   const sendMessage = async () => {
     const trimmed = message.trim();
+
     if (!trimmed || thinking) return;
 
-    const userMsg = { role: "user", text: trimmed, time: getTime() };
+    const userMsg = {
+      role: "user",
+      text: trimmed,
+      time: getTime(),
+    };
+
     setChat((prev) => [...prev, userMsg]);
     setMessage("");
     setThinking(true);
 
-    if (textareaRef.current) textareaRef.current.style.height = "auto";
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
 
     try {
-      const res = await axios.post("http://localhost:5000/chat", {
+      const res = await axios.post(`${API_URL}/chat`, {
         message: trimmed,
       });
 
       setChat((prev) => [
         ...prev,
-        { role: "ai", text: res.data.reply, time: getTime() },
+        {
+          role: "ai",
+          text: res.data.reply,
+          time: getTime(),
+        },
       ]);
     } catch (err) {
-      const errMsg = err.response?.data?.error || err.message;
+      const errMsg =
+        err.response?.data?.error ||
+        err.message ||
+        "Something went wrong";
 
       setChat((prev) => [
         ...prev,
-        { role: "ai", text: `⚠️ ${errMsg}`, time: getTime(), error: true },
+        {
+          role: "ai",
+          text: `⚠️ ${errMsg}`,
+          time: getTime(),
+          error: true,
+        },
       ]);
     } finally {
       setThinking(false);
@@ -61,8 +85,11 @@ export default function App() {
 
   const handleInput = (e) => {
     setMessage(e.target.value);
+
     e.target.style.height = "auto";
-    e.target.style.height = Math.min(e.target.scrollHeight, 100) + "px";
+
+    e.target.style.height =
+      Math.min(e.target.scrollHeight, 100) + "px";
   };
 
   return (
@@ -71,10 +98,14 @@ export default function App() {
         {/* Header */}
         <div className="header">
           <div className="header-icon">✦</div>
+
           <div>
             <div className="header-title">AI Chatbot</div>
-            <div className="header-sub">Powered by Gemini 3.8 Flash</div>
+            <div className="header-sub">
+              Powered by Gemini 3.8 Flash
+            </div>
           </div>
+
           <div className="status-dot" />
         </div>
 
@@ -83,7 +114,9 @@ export default function App() {
           {chat.length === 0 && !thinking && (
             <div className="empty-state">
               <div className="empty-icon">✦</div>
-              <div className="empty-text">Start a conversation</div>
+              <div className="empty-text">
+                Start a conversation
+              </div>
             </div>
           )}
 
@@ -94,9 +127,14 @@ export default function App() {
               </div>
 
               <div>
-                <div className={`bubble ${msg.role}${msg.error ? " error" : ""}`}>
+                <div
+                  className={`bubble ${msg.role}${
+                    msg.error ? " error" : ""
+                  }`}
+                >
                   {msg.text}
                 </div>
+
                 <div className="timestamp">{msg.time}</div>
               </div>
             </div>
@@ -106,6 +144,7 @@ export default function App() {
           {thinking && (
             <div className="msg-row ai">
               <div className="avatar ai">G</div>
+
               <div className="thinking-bubble">
                 <span className="thinking-label">thinking</span>
                 <div className="dot" />
@@ -153,7 +192,9 @@ export default function App() {
             </button>
           </div>
 
-          <div className="hint">Enter to send · Shift+Enter for new line</div>
+          <div className="hint">
+            Enter to send · Shift+Enter for new line
+          </div>
         </div>
       </div>
     </>
