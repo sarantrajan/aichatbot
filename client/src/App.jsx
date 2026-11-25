@@ -3,7 +3,8 @@ import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 function getTime() {
   return new Date().toLocaleTimeString([], {
@@ -21,7 +22,10 @@ export default function App() {
   const textareaRef = useRef(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
   }, [chat, thinking]);
 
   const sendMessage = async () => {
@@ -87,116 +91,115 @@ export default function App() {
     setMessage(e.target.value);
 
     e.target.style.height = "auto";
-
     e.target.style.height =
-      Math.min(e.target.scrollHeight, 100) + "px";
+      Math.min(e.target.scrollHeight, 120) + "px";
   };
 
   return (
-    <>
-      <div className="app">
-        {/* Header */}
-        <div className="header">
-          <div className="header-icon">✦</div>
+    <main className="app">
+      {/* Header */}
+      <header className="header">
+        <div className="header-icon">✦</div>
 
-          <div>
-            <div className="header-title">AI Chatbot</div>
-            <div className="header-sub">
-              Powered by Gemini 3.8 Flash
+        <div className="header-content">
+          <div className="header-title">AI Chatbot</div>
+          <div className="header-sub">
+            Powered by Gemini 3.8 Flash
+          </div>
+        </div>
+
+        <div className="status-dot" />
+      </header>
+
+      {/* Chat */}
+      <section className="chat-area">
+        {chat.length === 0 && !thinking && (
+          <div className="empty-state">
+            <div className="empty-icon">✦</div>
+            <div className="empty-text">
+              Start a conversation
             </div>
           </div>
+        )}
 
-          <div className="status-dot" />
-        </div>
-
-        {/* Chat */}
-        <div className="chat-area">
-          {chat.length === 0 && !thinking && (
-            <div className="empty-state">
-              <div className="empty-icon">✦</div>
-              <div className="empty-text">
-                Start a conversation
-              </div>
+        {chat.map((msg, i) => (
+          <div key={i} className={`msg-row ${msg.role}`}>
+            <div className={`avatar ${msg.role}`}>
+              {msg.role === "ai" ? "G" : "U"}
             </div>
-          )}
 
-          {chat.map((msg, i) => (
-            <div key={i} className={`msg-row ${msg.role}`}>
-              <div className={`avatar ${msg.role}`}>
-                {msg.role === "ai" ? "G" : "U"}
-              </div>
-
-              <div>
-                <div
-                  className={`bubble ${msg.role}${
-                    msg.error ? " error" : ""
-                  }`}
-                >
-                  {msg.text}
-                </div>
-
-                <div className="timestamp">{msg.time}</div>
-              </div>
-            </div>
-          ))}
-
-          {/* Thinking indicator */}
-          {thinking && (
-            <div className="msg-row ai">
-              <div className="avatar ai">G</div>
-
-              <div className="thinking-bubble">
-                <span className="thinking-label">thinking</span>
-                <div className="dot" />
-                <div className="dot" />
-                <div className="dot" />
-              </div>
-            </div>
-          )}
-
-          <div ref={bottomRef} />
-        </div>
-
-        {/* Input */}
-        <div className="input-area">
-          <div className="input-row">
-            <textarea
-              ref={textareaRef}
-              className="chat-input"
-              rows={1}
-              value={message}
-              onChange={handleInput}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask me anything..."
-              disabled={thinking}
-            />
-
-            <button
-              className="send-btn"
-              onClick={sendMessage}
-              disabled={!message.trim() || thinking}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            <div className="message-content">
+              <div
+                className={`bubble ${msg.role}${
+                  msg.error ? " error" : ""
+                }`}
               >
-                <line x1="22" y1="2" x2="11" y2="13" />
-                <polygon points="22 2 15 22 11 13 2 9 22 2" />
-              </svg>
-            </button>
-          </div>
+                {msg.text}
+              </div>
 
-          <div className="hint">
-            Enter to send · Shift+Enter for new line
+              <div className="timestamp">{msg.time}</div>
+            </div>
           </div>
+        ))}
+
+        {/* Thinking Indicator */}
+        {thinking && (
+          <div className="msg-row ai">
+            <div className="avatar ai">G</div>
+
+            <div className="thinking-bubble">
+              <span className="thinking-label">thinking</span>
+              <div className="dot" />
+              <div className="dot" />
+              <div className="dot" />
+            </div>
+          </div>
+        )}
+
+        <div ref={bottomRef} />
+      </section>
+
+      {/* Input */}
+      <footer className="input-area">
+        <div className="input-row">
+          <textarea
+            ref={textareaRef}
+            className="chat-input"
+            rows={1}
+            value={message}
+            onChange={handleInput}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask me anything..."
+            disabled={thinking}
+          />
+
+          <button
+            className="send-btn"
+            onClick={sendMessage}
+            disabled={!message.trim() || thinking}
+            aria-label="Send message"
+            type="button"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+            </svg>
+          </button>
         </div>
-      </div>
-    </>
+
+        <div className="hint">
+          Enter to send · Shift+Enter for new line
+        </div>
+      </footer>
+    </main>
   );
 }
